@@ -1,0 +1,30 @@
+# monitor.yaml
+resources:
+- name: my-alert-policy
+  type: gcp-types/monitoring-v3:alertPolicies
+  properties:
+    displayName: "High CPU Usage Alert"
+    notificationChannels:
+      - $(ref.my-notification-channel.id)
+    alertStrategy:
+      notificationRateLimit:
+        period: "60s"
+        threshold: 3
+    conditions:
+      - displayName: "VM Instance CPU Usage"
+        conditionThreshold:
+          filter: 'resource.type="gce_instance" AND metric.type="compute.googleapis.com/instance/disk/write_bytes_count"'
+          comparison: COMPARISON_GT
+          thresholdValue: 0
+          aggregations:
+            - alignmentPeriod: "60s"
+              perSeriesAligner: ALIGN_RATE
+    enabled: true
+
+- name: my-notification-channel
+  type: gcp-types/monitoring-v3:notificationChannels
+  properties:
+    displayName: "Email Notifications"
+    type: "email"
+    labels:
+      emailAddress: "flaviab@outlook.com"
